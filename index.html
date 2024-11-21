@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Contacto</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-16">
+        <form id="contactForm" class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-6 text-center">Contáctanos</h2>
+            
+            <div class="mb-4">
+                <label for="name" class="block mb-2">Nombre</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required 
+                    class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
+                >
+            </div>
+            
+            <div class="mb-4">
+                <label for="email" class="block mb-2">Correo Electrónico</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
+                >
+            </div>
+            
+            <div class="mb-4">
+                <label for="phone" class="block mb-2">Teléfono (opcional)</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
+                >
+            </div>
+            
+            <div class="mb-4">
+                <label for="message" class="block mb-2">Mensaje</label>
+                <textarea 
+                    id="message" 
+                    name="message" 
+                    required 
+                    rows="4" 
+                    class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
+                ></textarea>
+            </div>
+            
+            <button 
+                type="submit" 
+                class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition duration-300"
+            >
+                Enviar Mensaje
+            </button>
+
+            <div 
+                id="successMessage" 
+                class="hidden mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" 
+                role="alert"
+            >
+                <strong class="font-bold">¡Mensaje enviado!</strong>
+                <span class="block sm:inline">Tu mensaje ha sido recibido con éxito.</span>
+            </div>
+
+            <div 
+                id="errorMessage" 
+                class="hidden mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" 
+                role="alert"
+            >
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline">No se pudo enviar el mensaje. Inténtalo de nuevo.</span>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Resetear mensajes
+        successMessage.classList.add('hidden');
+        errorMessage.classList.add('hidden');
+
+        // Recoger datos del formulario
+        const formData = {
+            name: form.name.value,
+            email: form.email.value,
+            phone: form.phone.value || 'No proporcionado',
+            message: form.message.value
+        };
+
+        // Enviar a servicio de notificaciones (ejemplo con webhook)
+        axios.post('https://webhook.site/5ed65337-7114-4527-a4b8-12773ab03c59', formData)
+            .then(response => {
+                // Mostrar mensaje de éxito
+                successMessage.classList.remove('hidden');
+                
+                // Limpiar formulario
+                form.reset();
+
+                // Opcional: Enviar notificación push/email
+                sendTelegramNotification(formData);
+            })
+            .catch(error => {
+                // Mostrar mensaje de error
+                errorMessage.classList.remove('hidden');
+                console.error('Error:', error);
+            });
+    });
+
+    function sendTelegramNotification(formData) {
+        const botToken = '7009385235:AAFMOYD7IU5VDZJ-U0_OXmdeuaPm_DX6Uoo';
+        const chatId = '7345066700';
+        const message = `
+📩 Nuevo mensaje de contacto:
+👤 Nombre: ${formData.name}
+📧 Email: ${formData.email}
+📱 Teléfono: ${formData.phone}
+💬 Mensaje: ${formData.message}
+        `;
+
+        axios.post(`https://api.telegram.org/bot7009385235:AAFMOYD7IU5VDZJ-U0_OXmdeuaPm_DX6Uoo/sendMessage`, {
+            chat_id: chatId,
+            text: message
+        });
+    }
+    </script>
+</body>
+  </html>
