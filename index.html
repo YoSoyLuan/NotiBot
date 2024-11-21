@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Contacto</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Bar Luan</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
@@ -83,6 +82,44 @@
     </div>
 
     <script>
+    // 🤖 CONFIGURACIÓN DE TELEGRAM 
+    const TELEGRAM_BOT_TOKEN = '7009385235:AAFMOYD7IU5VDZJ-U0_OXmdeuaPm_DX6Uoo';
+    const TELEGRAM_CHAT_ID = '7345066700';
+
+    function sendTelegramNotification(formData) {
+        const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+        const message = `
+📩 Nuevo mensaje de contacto:
+👤 Nombre: ${formData.name}
+📧 Email: ${formData.email}
+📱 Teléfono: ${formData.phone || 'No proporcionado'}
+💬 Mensaje: ${formData.message}
+        `;
+
+        const payload = {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message
+        };
+
+        fetch(telegramApiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al enviar notificación de Telegram');
+            }
+            console.log('Notificación enviada correctamente');
+        })
+        .catch(error => {
+            console.error('Error en notificación de Telegram:', error);
+        });
+    }
+
     document.getElementById('contactForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -90,11 +127,9 @@
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
 
-        // Resetear mensajes
         successMessage.classList.add('hidden');
         errorMessage.classList.add('hidden');
 
-        // Recoger datos del formulario
         const formData = {
             name: form.name.value,
             email: form.email.value,
@@ -102,41 +137,30 @@
             message: form.message.value
         };
 
-        // Enviar a servicio de notificaciones (ejemplo con webhook)
-        axios.post('https://webhook.site/5ed65337-7114-4527-a4b8-12773ab03c59', formData)
-            .then(response => {
-                // Mostrar mensaje de éxito
-                successMessage.classList.remove('hidden');
-                
-                // Limpiar formulario
-                form.reset();
-
-                // Opcional: Enviar notificación push/email
+        // 🌐 Webhook de prueba (reemplazar con tu endpoint)
+        fetch('https://webhook.site/5ed65337-7114-4527-a4b8-12773ab03c59', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                // Enviar notificación a Telegram
                 sendTelegramNotification(formData);
-            })
-            .catch(error => {
-                // Mostrar mensaje de error
-                errorMessage.classList.remove('hidden');
-                console.error('Error:', error);
-            });
-    });
-
-    function sendTelegramNotification(formData) {
-        const botToken = '7009385235:AAFMOYD7IU5VDZJ-U0_OXmdeuaPm_DX6Uoo';
-        const chatId = '7345066700';
-        const message = `
-📩 Nuevo mensaje de contacto:
-👤 Nombre: ${formData.name}
-📧 Email: ${formData.email}
-📱 Teléfono: ${formData.phone}
-💬 Mensaje: ${formData.message}
-        `;
-
-        axios.post(`https://api.telegram.org/bot7009385235:AAFMOYD7IU5VDZJ-U0_OXmdeuaPm_DX6Uoo/sendMessage`, {
-            chat_id: chatId,
-            text: message
+                
+                successMessage.classList.remove('hidden');
+                form.reset();
+            } else {
+                throw new Error('Error en el envío del formulario');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            errorMessage.classList.remove('hidden');
         });
-    }
+    });
     </script>
 </body>
-  </html>
+                </html>
